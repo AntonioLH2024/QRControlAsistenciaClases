@@ -23,7 +23,8 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
   const [config, setConfig] = useState({
     spreadsheetId: localStorage.getItem('pref_spreadsheet_id') || '',
     maxDistance: parseInt(localStorage.getItem('pref_max_distance') || '100'),
-    useExistingSheet: localStorage.getItem('pref_use_existing') === 'true'
+    useExistingSheet: localStorage.getItem('pref_use_existing') === 'true',
+    expirationMinutes: parseInt(localStorage.getItem('pref_expiration_minutes') || '15')
   });
 
   const saveConfig = (newConfig: typeof config) => {
@@ -31,6 +32,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
     localStorage.setItem('pref_spreadsheet_id', newConfig.spreadsheetId);
     localStorage.setItem('pref_max_distance', newConfig.maxDistance.toString());
     localStorage.setItem('pref_use_existing', newConfig.useExistingSheet.toString());
+    localStorage.setItem('pref_expiration_minutes', newConfig.expirationMinutes.toString());
     setShowSettings(false);
   };
 
@@ -81,7 +83,8 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
           name: `Clase ${new Date().toLocaleDateString()}`,
           location,
           spreadsheetId: config.useExistingSheet ? config.spreadsheetId : null,
-          maxDistance: config.maxDistance
+          maxDistance: config.maxDistance,
+          expirationMinutes: config.expirationMinutes
         })
       });
       const data = await response.json();
@@ -99,7 +102,11 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
           }
         });
         setQrDataUrl(qr);
-        setTimeLeft(15 * 60); // 15 minutes
+        
+        // Calculate time left from expiresAt
+        const expiresAt = data.expiresAt;
+        const remaining = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+        setTimeLeft(remaining);
       } else {
         setError(data.error || "Error al crear la clase");
       }
@@ -311,6 +318,21 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
                 />
                 <p className="text-[10px] text-[#141414]/40 italic">
                   Radio permitido para que el alumno pueda registrarse.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-[#141414]/40">Tiempo de Expiración (minutos)</label>
+                <input 
+                  type="number" 
+                  value={config.expirationMinutes}
+                  onChange={(e) => setConfig({...config, expirationMinutes: parseInt(e.target.value) || 1})}
+                  min="1"
+                  max="120"
+                  className="w-full p-4 rounded-xl bg-[#F5F5F0] border-none focus:ring-2 focus:ring-[#5A5A40] text-sm"
+                />
+                <p className="text-[10px] text-[#141414]/40 italic">
+                  Duración de la validez del código QR.
                 </p>
               </div>
 

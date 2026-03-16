@@ -16,7 +16,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "default-secret-change-me";
 // In-memory store for sessions (In a real app, use Firestore)
 const sessionsStore = new Map<string, { 
   sheetId: string, 
-  attendees: Set<string>,
+  attendees: Map<string, { name: string, surname: string }>,
   location?: { latitude: number, longitude: number },
   maxDistance: number
 }>();
@@ -246,7 +246,7 @@ app.use(express.json());
   app.post("/api/classes", async (req, res) => {
     let sheetId = "mock-sheet-id";
     let googleError = null;
-    const { name, location, spreadsheetId: customSheetId, maxDistance = 100 } = req.body;
+    const { name, location, spreadsheetId: customSheetId, maxDistance = 100, expirationMinutes = 15 } = req.body;
     const classId = uuidv4();
 
     try {
@@ -282,13 +282,13 @@ app.use(express.json());
       // 2. Store session info (Security: sheetId stays on server)
       sessionsStore.set(classId, { 
         sheetId: sheetId!, 
-        attendees: new Set(), 
+        attendees: new Map(), 
         location,
         maxDistance
       });
       
       // 3. Generate token
-      const token = jwt.sign({ classId, type: 'attendance' }, JWT_SECRET, { expiresIn: '15m' });
+      const token = jwt.sign({ classId, type: 'attendance' }, JWT_SECRET, { expiresIn: `${expirationMinutes}m` });
       
       res.json({
         success: true,
@@ -297,7 +297,7 @@ app.use(express.json());
         name,
         sheetUrl: sheetId !== "mock-sheet-id" ? `https://docs.google.com/spreadsheets/d/${sheetId}/edit` : null,
         googleError,
-        expiresAt: Date.now() + 15 * 60 * 1000
+        expiresAt: Date.now() + (expirationMinutes * 60 * 1000)
       });
     } catch (error: any) {
       console.error("Error creating class:", error);
@@ -376,7 +376,7 @@ app.use(express.json());
       }
 
       // 5. Mark as registered in memory FIRST (Ensures teacher sees it even if Sheets fails)
-      session.attendees.add(dni);
+      session.attendees.set(dni, { name, surname });
 
       // 6. Write to Google Sheets
       if (GOOGLE_EMAIL && session.sheetId && session.sheetId !== "mock-sheet-id") {
@@ -500,11 +500,17 @@ app.use(express.json());
       return res.status(404).json({ success: false, error: "Sesión no encontrada" });
     }
     
-    // Convert Set to array of mock records for the UI
+    // Convert Map to array of records for the UI
+    const attendeesList = Array.from(session.attendees.entries()).map(([dni, info]) => ({
+      dni,
+      name: info.name,
+      surname: info.surname
+    }));
+
     res.json({ 
       success: true, 
       count: session.attendees.size,
-      attendees: Array.from(session.attendees).map(dni => ({ dni, name: "Alumno", surname: "Registrado" }))
+      attendees: attendeesList
     });
   });
 
