@@ -1,0 +1,5 @@
+{
+  "name": "AsistenciaQR - Registro de Asistencia Inteligente",
+  "description": "Sistema profesional de registro de asistencia mediante códigos QR dinámicos e integración con Google Sheets.",
+  "requestFramePermissions": ["camera", "geolocation"]
+}

@@ -1,0 +1,42 @@
+{
+  "entities": {
+    "sessions": {
+      "title": "Sesiones de Clase",
+      "description": "Almacena la información de cada clase generada por el profesor",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "classId": { "type": "string" },
+        "sheetId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "number" },
+        "token": { "type": "string" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["classId", "sheetId", "expiresAt"]
+    },
+    "attendance": {
+      "title": "Registros de Asistencia",
+      "description": "Registros individuales de alumnos para cada clase",
+      "type": "object",
+      "properties": {
+        "classId": { "type": "string" },
+        "dni": { "type": "string" },
+        "name": { "type": "string" },
+        "surname": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["classId", "dni", "name", "surname"]
+    }
+  },
+  "firestore": {
+    "/sessions/{sessionId}": {
+      "schema": "sessions",
+      "description": "Colección de sesiones de clase"
+    },
+    "/sessions/{sessionId}/attendance/{attendanceId}": {
+      "schema": "attendance",
+      "description": "Subcolección de alumnos registrados en una sesión"
+    }
+  }
+}
