@@ -1,5 +1,4 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import { google } from "googleapis";
@@ -169,15 +168,11 @@ async function createAttendanceSheet(className: string) {
   }
 }
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+const app = express();
+app.use(express.json());
 
-  app.use(express.json());
-
-  // API Routes
-  
-  // Health check for Google API
+// API Routes
+// Health check for Google API
   app.get("/api/health/google", async (req, res) => {
     try {
       const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -497,7 +492,7 @@ async function startServer() {
     }
   });
 
-  // Get attendees for a class
+  // Polling for attendees
   app.get("/api/classes/:classId/attendees", (req, res) => {
     const { classId } = req.params;
     const session = sessionsStore.get(classId);
@@ -506,7 +501,6 @@ async function startServer() {
     }
     
     // Convert Set to array of mock records for the UI
-    // In a real app, we'd store the full record in the Map or Firestore
     res.json({ 
       success: true, 
       count: session.attendees.size,
@@ -514,14 +508,28 @@ async function startServer() {
     });
   });
 
+  // Global error handler
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error("💥 Global Error Handler:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error interno del servidor",
+      message: err.message 
+    });
+  });
+
+async function startServer() {
+  const PORT = 3000;
+  
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else {
+  } else if (process.env.NODE_ENV === "production" && !process.env.VERCEL) {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
@@ -529,10 +537,14 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    testGoogleConnection();
-  });
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+      testGoogleConnection();
+    });
+  }
 }
 
 startServer();
+
+export default app;
