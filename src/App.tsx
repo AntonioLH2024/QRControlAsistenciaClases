@@ -50,7 +50,7 @@ export default function App() {
           >
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform overflow-hidden border border-primary/20">
               <img 
-                src="/logo.png" 
+                src="logo academia transparente.png" 
                 alt="Logo" 
                 className="w-full h-full object-contain p-1"
                 onError={(e) => {

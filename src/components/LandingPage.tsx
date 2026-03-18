@@ -47,7 +47,18 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           >
             <div className="aspect-square bg-white rounded-[48px] shadow-2xl p-12 flex items-center justify-center relative overflow-hidden border border-ink/5">
               <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,var(--color-primary)10,transparent)]" />
-              <QrCode size={240} strokeWidth={1.5} className="text-ink relative z-10" />
+              <img 
+                src="/logo.png" 
+                alt="Logo Principal" 
+                className="w-full h-full object-contain relative z-10"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
+                }}
+              />
+              <div className="fallback-icon hidden relative z-10">
+                <QrCode size={240} strokeWidth={1.5} className="text-ink" />
+              </div>
               
               {/* Floating elements */}
               <motion.div 

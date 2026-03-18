@@ -224,8 +224,8 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
                 }
               </p>
               {googleStatus && !activeSession && (
-                <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${googleStatus.success ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-600 border border-red-100'}`}>
-                  <div className={`w-1.5 h-1.5 rounded-full ${googleStatus.success ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${googleStatus.success ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-red-50 text-red-600 border border-red-100'}`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${googleStatus.success ? 'bg-primary animate-pulse' : 'bg-red-500'}`} />
                   {googleStatus.success ? 'Google Conectado' : 'Google Error'}
                 </div>
               )}
@@ -394,13 +394,13 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
                   <span>Expira en: {formatTime(timeLeft)}</span>
                 </div>
                 {activeSession.location && (
-                  <div className="flex items-center gap-1 text-[10px] text-emerald-600 font-bold uppercase tracking-tighter">
+                  <div className="flex items-center gap-1 text-[10px] text-primary font-bold uppercase tracking-tighter">
                     <ShieldCheck size={10} />
                     <span>Ubicación Verificada</span>
                   </div>
                 )}
               </div>
-              <div className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider">
+              <div className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
                 Activo
               </div>
             </div>
@@ -444,7 +444,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
                 onClick={copyLink}
                 className="w-full border border-ink/10 py-3 rounded-xl font-bold hover:bg-ink/5 transition-colors flex items-center justify-center gap-2"
               >
-                {copied ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
+                {copied ? <Check size={18} className="text-primary" /> : <Copy size={18} />}
                 {copied ? "Enlace Copiado" : "Copiar Enlace Alumno"}
               </button>
             </div>
@@ -487,7 +487,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
                       <p className="font-bold">{attendee.name} {attendee.surname}</p>
                       <p className="text-xs text-ink/40 font-mono">{attendee.dni}</p>
                     </div>
-                    <div className="text-emerald-500">
+                    <div className="text-primary">
                       <CheckCircle2 size={20} />
                     </div>
                   </motion.div>

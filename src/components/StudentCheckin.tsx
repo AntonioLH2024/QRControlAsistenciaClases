@@ -114,17 +114,17 @@ export default function StudentCheckin() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md mx-auto bg-white p-10 rounded-[40px] shadow-2xl shadow-emerald-500/10 border border-emerald-100 text-center"
+        className="max-w-md mx-auto bg-white p-10 rounded-[40px] shadow-2xl shadow-primary/10 border border-primary/10 text-center"
       >
-        <div className="w-24 h-24 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500 mx-auto mb-8">
+        <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-8">
           <CheckCircle2 size={48} />
         </div>
-        <h2 className="text-3xl font-serif italic font-bold mb-4 text-emerald-900">¡Registro Completado!</h2>
+        <h2 className="text-3xl font-serif italic font-bold mb-4 text-primary">¡Registro Completado!</h2>
         <p className="text-ink/60 mb-8">
           Tu asistencia ha sido registrada correctamente en el sistema. Ya puedes cerrar esta ventana.
         </p>
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 inline-block">
-          <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+        <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 inline-block">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">
             {new Date().toLocaleDateString()} • {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
@@ -135,6 +135,22 @@ export default function StudentCheckin() {
   return (
     <div className="max-w-md mx-auto">
       <div className="text-center mb-10">
+        <div className="flex justify-center mb-6">
+          <div className="w-24 h-24 rounded-2xl bg-white shadow-lg p-2 border border-ink/5 overflow-hidden">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
+              }}
+            />
+            <div className="fallback-icon hidden w-full h-full flex items-center justify-center">
+              <ShieldCheck size={48} className="text-primary" />
+            </div>
+          </div>
+        </div>
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-4">
           <ShieldCheck size={14} />
           Registro Seguro
