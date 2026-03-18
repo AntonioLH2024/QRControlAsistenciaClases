@@ -40,26 +40,38 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0] text-[#141414] font-sans selection:bg-[#5A5A40] selection:text-white">
+    <div className="min-h-screen bg-bg text-ink font-sans selection:bg-primary selection:text-white">
       {/* Navigation / Header */}
-      <header className="border-b border-[#141414]/10 bg-white/50 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-primary/10 bg-white/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <div 
-            className="flex items-center gap-2 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group"
             onClick={() => navigate('/')}
           >
-            <div className="w-10 h-10 rounded-xl bg-[#5A5A40] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-              <QrCode size={24} />
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform overflow-hidden border border-primary/20">
+              <img 
+                src="/logo.png" 
+                alt="Logo" 
+                className="w-full h-full object-contain p-1"
+                onError={(e) => {
+                  // Fallback to Icon if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
+                }}
+              />
+              <div className="fallback-icon hidden">
+                <QrCode size={24} className="text-primary" />
+              </div>
             </div>
-            <span className="font-serif italic text-xl font-bold tracking-tight">AsistenciaQR</span>
+            <span className="font-serif italic text-xl font-bold tracking-tight text-primary">AsistenciaQR</span>
           </div>
           
           <nav className="hidden sm:flex items-center gap-6">
             <button 
               onClick={() => navigate('/')}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-[#5A5A40]",
-                path === '/' ? "text-[#5A5A40]" : "text-[#141414]/60"
+                "text-sm font-medium transition-colors hover:text-primary",
+                path === '/' ? "text-primary" : "text-ink/60"
               )}
             >
               Inicio
@@ -67,8 +79,8 @@ export default function App() {
             <button 
               onClick={() => navigate('/teacher')}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-[#5A5A40]",
-                path === '/teacher' ? "text-[#5A5A40]" : "text-[#141414]/60"
+                "text-sm font-medium transition-colors hover:text-primary",
+                path === '/teacher' ? "text-primary" : "text-ink/60"
               )}
             >
               Panel Profesor
@@ -113,15 +125,15 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      <footer className="border-t border-[#141414]/10 py-12 bg-white/30 mt-auto">
+      <footer className="border-t border-primary/10 py-12 bg-white/30 mt-auto">
         <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-6">
-          <div className="text-sm text-[#141414]/40 font-mono">
+          <div className="text-sm text-ink/40 font-mono">
             © 2026 ASISTENCIAQR • SISTEMA DE REGISTRO SEGURO
           </div>
-          <div className="flex gap-8 text-xs uppercase tracking-widest font-bold text-[#141414]/60">
-            <a href="#" className="hover:text-[#5A5A40] transition-colors">Privacidad</a>
-            <a href="#" className="hover:text-[#5A5A40] transition-colors">Soporte</a>
-            <a href="#" className="hover:text-[#5A5A40] transition-colors">API</a>
+          <div className="flex gap-8 text-xs uppercase tracking-widest font-bold text-ink/60">
+            <a href="#" className="hover:text-primary transition-colors">Privacidad</a>
+            <a href="#" className="hover:text-primary transition-colors">Soporte</a>
+            <a href="#" className="hover:text-primary transition-colors">API</a>
           </div>
         </div>
       </footer>

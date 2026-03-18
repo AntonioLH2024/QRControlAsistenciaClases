@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, QrCode, Users, Download, Clock, CheckCircle2, Loader2, ExternalLink, Copy, Check, ShieldCheck, ArrowLeft, Settings as SettingsIcon, X, AlertCircle } from 'lucide-react';
+import { Plus, QrCode, Users, Download, Clock, CheckCircle2, Loader2, ExternalLink, Copy, Check, ShieldCheck, ArrowLeft, Settings as SettingsIcon, X, AlertCircle, FileSpreadsheet } from 'lucide-react';
 import QRCode from 'qrcode';
 import { ClassSession, AttendanceRecord } from '../types';
 
@@ -17,7 +17,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [googleStatus, setGoogleStatus] = useState<{ success: boolean, sheetsApi: string, driveApi: string, error?: string } | null>(null);
+  const [googleStatus, setGoogleStatus] = useState<{ success: boolean, sheetsApi: string, driveApi: string, email?: string, error?: string } | null>(null);
   
   // Settings state
   const [config, setConfig] = useState({
@@ -97,7 +97,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
           width: 400,
           margin: 2,
           color: {
-            dark: '#141414',
+            dark: '#0F172A', // Using ink color for QR
             light: '#FFFFFF'
           }
         });
@@ -169,6 +169,38 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const downloadAttendeesExcel = () => {
+    if (attendees.length === 0) return;
+
+    // Create CSV content with BOM for Excel UTF-8 support
+    const headers = ['Nombre', 'Apellidos', 'DNI', 'Fecha', 'Hora'];
+    const rows = attendees.map(a => {
+      const date = new Date(a.timestamp);
+      return [
+        a.name,
+        a.surname,
+        a.dni,
+        date.toLocaleDateString(),
+        date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `Asistencia_${activeSession?.name || 'Clase'}_${new Date().toLocaleDateString()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -176,7 +208,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
           {activeSession && (
             <button 
               onClick={resetSession}
-              className="mt-2 p-2 rounded-xl hover:bg-[#141414]/5 transition-colors text-[#141414]/60"
+              className="mt-2 p-2 rounded-xl hover:bg-ink/5 transition-colors text-ink/60"
               title="Volver al inicio"
             >
               <ArrowLeft size={24} />
@@ -185,7 +217,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
           <div>
             <h1 className="text-4xl font-serif italic font-bold mb-2">Panel del Profesor</h1>
             <div className="flex items-center gap-4 mb-2">
-              <p className="text-[#141414]/60 max-w-lg">
+              <p className="text-ink/60 max-w-lg">
                 {activeSession 
                   ? `Gestionando asistencia para: ${activeSession.name}`
                   : "Genera un código QR para que tus alumnos registren su asistencia. Los datos se guardarán automáticamente en Google Sheets."
@@ -204,7 +236,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
           <div className="flex gap-2">
             <button
               onClick={() => setShowSettings(true)}
-              className="p-4 rounded-2xl bg-[#141414]/5 text-[#141414]/60 hover:bg-[#141414]/10 transition-all"
+              className="p-4 rounded-2xl bg-ink/5 text-ink/60 hover:bg-ink/10 transition-all"
               title="Configuración"
             >
               <SettingsIcon size={24} />
@@ -212,7 +244,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
             <button
               onClick={createClass}
               disabled={isLoading}
-              className="bg-[#5A5A40] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-[#4A4A35] transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+              className="bg-primary text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-primary/90 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
             >
               {isLoading ? <Loader2 className="animate-spin" /> : <Plus size={20} />}
               Crear Nueva Clase
@@ -248,43 +280,43 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-serif italic font-bold">Configuración</h2>
-              <button onClick={() => setShowSettings(false)} className="text-[#141414]/40 hover:text-[#141414]">
+              <button onClick={() => setShowSettings(false)} className="text-ink/40 hover:text-ink">
                 <X size={24} />
               </button>
             </div>
 
             <div className="space-y-6">
               {googleStatus?.email && (
-                <div className="p-4 bg-[#F5F5F0] rounded-2xl border border-[#141414]/5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#141414]/40 block mb-1">Email de la Cuenta de Servicio</label>
+                <div className="p-4 bg-bg rounded-2xl border border-ink/5">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-ink/40 block mb-1">Email de la Cuenta de Servicio</label>
                   <div className="flex items-center justify-between gap-2">
-                    <code className="text-[10px] bg-white px-2 py-1 rounded border border-[#141414]/10 flex-1 truncate">{googleStatus.email}</code>
+                    <code className="text-[10px] bg-white px-2 py-1 rounded border border-ink/10 flex-1 truncate">{googleStatus.email}</code>
                     <button 
                       onClick={() => {
-                        navigator.clipboard.writeText(googleStatus.email);
+                        navigator.clipboard.writeText(googleStatus.email || '');
                         alert("Email copiado al portapapeles");
                       }}
-                      className="p-1.5 hover:bg-white rounded-lg transition-colors text-[#5A5A40]"
+                      className="p-1.5 hover:bg-white rounded-lg transition-colors text-primary"
                       title="Copiar Email"
                     >
                       <Copy size={14} />
                     </button>
                   </div>
-                  <p className="text-[9px] text-[#141414]/40 mt-2 italic">
+                  <p className="text-[9px] text-ink/40 mt-2 italic">
                     Comparte tus hojas de cálculo con este email dándole permisos de **Editor**.
                   </p>
                 </div>
               )}
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-[#141414]/40">Hoja de Cálculo</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-ink/40">Hoja de Cálculo</label>
                 <div className="flex items-center gap-2 mb-2">
                   <input 
                     type="checkbox" 
                     id="useExisting" 
                     checked={config.useExistingSheet}
                     onChange={(e) => setConfig({...config, useExistingSheet: e.target.checked})}
-                    className="w-4 h-4 accent-[#5A5A40]"
+                    className="w-4 h-4 accent-primary"
                   />
                   <label htmlFor="useExisting" className="text-sm font-medium">Usar hoja existente</label>
                 </div>
@@ -295,7 +327,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
                       placeholder="ID de la Hoja (de la URL)"
                       value={config.spreadsheetId}
                       onChange={(e) => setConfig({...config, spreadsheetId: e.target.value})}
-                      className="w-full p-4 rounded-xl bg-[#F5F5F0] border-none focus:ring-2 focus:ring-[#5A5A40] text-sm"
+                      className="w-full p-4 rounded-xl bg-bg border-none focus:ring-2 focus:ring-primary text-sm"
                     />
                     <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-[10px] text-amber-800">
                       <p className="font-bold mb-1">⚠️ Recordatorio Importante:</p>
@@ -303,42 +335,42 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
                     </div>
                   </div>
                 )}
-                <p className="text-[10px] text-[#141414]/40 italic">
+                <p className="text-[10px] text-ink/40 italic">
                   Si no se especifica o no se marca, se creará una hoja nueva para cada clase.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-[#141414]/40">Distancia Máxima (metros)</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-ink/40">Distancia Máxima (metros)</label>
                 <input 
                   type="number" 
                   value={config.maxDistance}
                   onChange={(e) => setConfig({...config, maxDistance: parseInt(e.target.value) || 0})}
-                  className="w-full p-4 rounded-xl bg-[#F5F5F0] border-none focus:ring-2 focus:ring-[#5A5A40] text-sm"
+                  className="w-full p-4 rounded-xl bg-bg border-none focus:ring-2 focus:ring-primary text-sm"
                 />
-                <p className="text-[10px] text-[#141414]/40 italic">
+                <p className="text-[10px] text-ink/40 italic">
                   Radio permitido para que el alumno pueda registrarse.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-[#141414]/40">Tiempo de Expiración (minutos)</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-ink/40">Tiempo de Expiración (minutos)</label>
                 <input 
                   type="number" 
                   value={config.expirationMinutes}
                   onChange={(e) => setConfig({...config, expirationMinutes: parseInt(e.target.value) || 1})}
                   min="1"
                   max="120"
-                  className="w-full p-4 rounded-xl bg-[#F5F5F0] border-none focus:ring-2 focus:ring-[#5A5A40] text-sm"
+                  className="w-full p-4 rounded-xl bg-bg border-none focus:ring-2 focus:ring-primary text-sm"
                 />
-                <p className="text-[10px] text-[#141414]/40 italic">
+                <p className="text-[10px] text-ink/40 italic">
                   Duración de la validez del código QR.
                 </p>
               </div>
 
               <button 
                 onClick={() => saveConfig(config)}
-                className="w-full bg-[#5A5A40] text-white py-4 rounded-2xl font-bold hover:bg-[#4A4A35] transition-all"
+                className="w-full bg-primary text-white py-4 rounded-2xl font-bold hover:bg-primary/90 transition-all"
               >
                 Guardar Cambios
               </button>
@@ -353,11 +385,11 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-8 rounded-[32px] shadow-xl shadow-black/5 border border-[#141414]/5 flex flex-col items-center text-center"
+            className="bg-white p-8 rounded-[32px] shadow-xl shadow-black/5 border border-ink/5 flex flex-col items-center text-center"
           >
             <div className="mb-6 w-full flex justify-between items-center">
               <div className="flex flex-col items-start gap-1">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[#5A5A40]">
+                <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary">
                   <Clock size={16} />
                   <span>Expira en: {formatTime(timeLeft)}</span>
                 </div>
@@ -373,7 +405,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
               </div>
             </div>
 
-            <div className="bg-[#F5F5F0] p-4 rounded-2xl mb-6">
+            <div className="bg-bg p-4 rounded-2xl mb-6">
               {qrDataUrl && <img src={qrDataUrl} alt="QR Code" className="w-64 h-64" />}
             </div>
 
@@ -393,7 +425,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
             )}
 
             <h3 className="text-xl font-bold mb-2">{activeSession.name}</h3>
-            <p className="text-sm text-[#141414]/40 font-mono mb-6">ID: {activeSession.classId}</p>
+            <p className="text-sm text-ink/40 font-mono mb-6">ID: {activeSession.classId}</p>
             
             <div className="flex flex-col gap-3 w-full">
               <button 
@@ -403,14 +435,14 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
                   link.href = qrDataUrl;
                   link.click();
                 }}
-                className="w-full border border-[#141414]/10 py-3 rounded-xl font-bold hover:bg-[#141414]/5 transition-colors flex items-center justify-center gap-2"
+                className="w-full border border-ink/10 py-3 rounded-xl font-bold hover:bg-ink/5 transition-colors flex items-center justify-center gap-2"
               >
                 <Download size={18} />
                 Descargar QR
               </button>
               <button 
                 onClick={copyLink}
-                className="w-full border border-[#141414]/10 py-3 rounded-xl font-bold hover:bg-[#141414]/5 transition-colors flex items-center justify-center gap-2"
+                className="w-full border border-ink/10 py-3 rounded-xl font-bold hover:bg-ink/5 transition-colors flex items-center justify-center gap-2"
               >
                 {copied ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
                 {copied ? "Enlace Copiado" : "Copiar Enlace Alumno"}
@@ -422,16 +454,16 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-white p-8 rounded-[32px] shadow-xl shadow-black/5 border border-[#141414]/5 flex flex-col"
+            className="bg-white p-8 rounded-[32px] shadow-xl shadow-black/5 border border-ink/5 flex flex-col"
           >
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#5A5A40]/10 flex items-center justify-center text-[#5A5A40]">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                   <Users size={20} />
                 </div>
                 <div>
                   <h3 className="font-bold">Alumnos Registrados</h3>
-                  <p className="text-xs text-[#141414]/40 uppercase tracking-widest">En tiempo real</p>
+                  <p className="text-xs text-ink/40 uppercase tracking-widest">En tiempo real</p>
                 </div>
               </div>
               <span className="text-4xl font-serif italic font-bold">{attendees.length}</span>
@@ -439,7 +471,7 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
 
             <div className="flex-1 overflow-y-auto max-h-[300px] space-y-4 pr-2 custom-scrollbar">
               {attendees.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-[#141414]/20 py-12">
+                <div className="h-full flex flex-col items-center justify-center text-ink/20 py-12">
                   <Users size={48} strokeWidth={1} className="mb-4" />
                   <p className="italic">Esperando registros...</p>
                 </div>
@@ -449,11 +481,11 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     key={i}
-                    className="flex items-center justify-between p-4 rounded-2xl bg-[#F5F5F0]/50 border border-[#141414]/5"
+                    className="flex items-center justify-between p-4 rounded-2xl bg-bg/50 border border-ink/5"
                   >
                     <div>
                       <p className="font-bold">{attendee.name} {attendee.surname}</p>
-                      <p className="text-xs text-[#141414]/40 font-mono">{attendee.dni}</p>
+                      <p className="text-xs text-ink/40 font-mono">{attendee.dni}</p>
                     </div>
                     <div className="text-emerald-500">
                       <CheckCircle2 size={20} />
@@ -463,22 +495,34 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
               )}
             </div>
 
-            {activeSession.sheetUrl && (
-              <a 
-                href={activeSession.sheetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-8 w-full bg-[#141414] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all"
-              >
-                <ExternalLink size={20} />
-                Ver en Google Sheets
-              </a>
-            )}
+            <div className="mt-8 space-y-3">
+              {attendees.length > 0 && (
+                <button 
+                  onClick={downloadAttendeesExcel}
+                  className="w-full bg-primary/10 text-primary py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-primary/20 transition-all"
+                >
+                  <FileSpreadsheet size={20} />
+                  Descargar Listado (Excel/CSV)
+                </button>
+              )}
+
+              {activeSession.sheetUrl && (
+                <a 
+                  href={activeSession.sheetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-ink text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all"
+                >
+                  <ExternalLink size={20} />
+                  Ver en Google Sheets
+                </a>
+              )}
+            </div>
           </motion.div>
           <div className="lg:col-span-2 flex justify-center pt-4">
             <button 
               onClick={resetSession}
-              className="text-[#141414]/40 hover:text-[#141414] font-bold flex items-center gap-2 transition-colors py-4 px-8 rounded-2xl hover:bg-[#141414]/5"
+              className="text-ink/40 hover:text-ink font-bold flex items-center gap-2 transition-colors py-4 px-8 rounded-2xl hover:bg-ink/5"
             >
               <ArrowLeft size={18} />
               Finalizar Sesión y Volver al Inicio
@@ -492,12 +536,12 @@ export default function TeacherDashboard({ onNavigate }: TeacherDashboardProps) 
             { icon: <Users />, title: "Lista en Vivo", desc: "Mira quién se registra en tiempo real desde tu dispositivo." },
             { icon: <Download />, title: "Google Sheets", desc: "Exportación directa y automática a hojas de cálculo de Google." }
           ].map((feature, i) => (
-            <div key={i} className="bg-white p-8 rounded-[32px] border border-[#141414]/5 shadow-sm">
-              <div className="w-12 h-12 rounded-2xl bg-[#5A5A40]/10 flex items-center justify-center text-[#5A5A40] mb-6">
+            <div key={i} className="bg-white p-8 rounded-[32px] border border-ink/5 shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
                 {feature.icon}
               </div>
               <h3 className="font-bold mb-2">{feature.title}</h3>
-              <p className="text-sm text-[#141414]/60 leading-relaxed">{feature.desc}</p>
+              <p className="text-sm text-ink/60 leading-relaxed">{feature.desc}</p>
             </div>
           ))}
         </div>

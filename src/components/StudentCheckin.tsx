@@ -101,7 +101,7 @@ export default function StudentCheckin() {
           <AlertCircle size={40} />
         </div>
         <h2 className="text-2xl font-bold mb-4">Enlace Inválido</h2>
-        <p className="text-[#141414]/60">
+        <p className="text-ink/60">
           Este enlace no contiene la información necesaria para registrar la asistencia. 
           Por favor, escanea el código QR de nuevo.
         </p>
@@ -120,7 +120,7 @@ export default function StudentCheckin() {
           <CheckCircle2 size={48} />
         </div>
         <h2 className="text-3xl font-serif italic font-bold mb-4 text-emerald-900">¡Registro Completado!</h2>
-        <p className="text-[#141414]/60 mb-8">
+        <p className="text-ink/60 mb-8">
           Tu asistencia ha sido registrada correctamente en el sistema. Ya puedes cerrar esta ventana.
         </p>
         <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 inline-block">
@@ -135,18 +135,18 @@ export default function StudentCheckin() {
   return (
     <div className="max-w-md mx-auto">
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#5A5A40]/10 text-[#5A5A40] text-xs font-bold uppercase tracking-widest mb-4">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-4">
           <ShieldCheck size={14} />
           Registro Seguro
         </div>
         <h1 className="text-4xl font-serif italic font-bold mb-2">Registro de Asistencia</h1>
-        <p className="text-[#141414]/60">Introduce tus datos para confirmar tu presencia en clase.</p>
+        <p className="text-ink/60">Introduce tus datos para confirmar tu presencia en clase.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div className="relative group">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#141414]/30 group-focus-within:text-[#5A5A40] transition-colors">
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-ink/30 group-focus-within:text-primary transition-colors">
               <User size={20} />
             </div>
             <input
@@ -154,12 +154,12 @@ export default function StudentCheckin() {
               placeholder="Nombre"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className="w-full bg-white border border-[#141414]/10 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/20 focus:border-[#5A5A40] transition-all"
+              className="w-full bg-white border border-ink/10 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
           </div>
 
           <div className="relative group">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#141414]/30 group-focus-within:text-[#5A5A40] transition-colors">
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-ink/30 group-focus-within:text-primary transition-colors">
               <User size={20} />
             </div>
             <input
@@ -167,12 +167,12 @@ export default function StudentCheckin() {
               placeholder="Apellidos"
               value={formData.surname}
               onChange={e => setFormData({ ...formData, surname: e.target.value })}
-              className="w-full bg-white border border-[#141414]/10 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/20 focus:border-[#5A5A40] transition-all"
+              className="w-full bg-white border border-ink/10 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
           </div>
 
           <div className="relative group">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#141414]/30 group-focus-within:text-[#5A5A40] transition-colors">
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-ink/30 group-focus-within:text-primary transition-colors">
               <CreditCard size={20} />
             </div>
             <input
@@ -180,7 +180,7 @@ export default function StudentCheckin() {
               placeholder="DNI / NIE"
               value={formData.dni}
               onChange={e => setFormData({ ...formData, dni: e.target.value.toUpperCase() })}
-              className="w-full bg-white border border-[#141414]/10 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/20 focus:border-[#5A5A40] transition-all font-mono"
+              className="w-full bg-white border border-ink/10 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-mono"
             />
           </div>
         </div>
@@ -199,7 +199,7 @@ export default function StudentCheckin() {
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="w-full bg-[#5A5A40] text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-[#4A4A35] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+          className="w-full bg-primary text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
         >
           {status === 'loading' ? (
             <Loader2 className="animate-spin" />
@@ -212,7 +212,7 @@ export default function StudentCheckin() {
         </button>
       </form>
 
-      <p className="mt-8 text-center text-xs text-[#141414]/40 leading-relaxed">
+      <p className="mt-8 text-center text-xs text-ink/40 leading-relaxed">
         Al registrarte, confirmas que estás presente físicamente en el aula. 
         Tu dirección IP y dispositivo serán registrados para evitar fraudes.
       </p>
